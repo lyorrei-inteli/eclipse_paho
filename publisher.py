@@ -1,18 +1,22 @@
+from sensor_simulator import SolarRadiationSensorSimulator
 import paho.mqtt.client as mqtt
-import time
-import random
+import time 
 
-client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, "python_publisher")
+# Configurações do MQTT
+broker_address = "localhost"
+port = 1891  # Porta padrão do MQTT
+topic = "solar_sensor"
 
-client.connect("localhost", 1891, 60)
+# Inicialização do cliente MQTT
+client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, "python_publisher")
+client.connect(broker_address, port, 60)
+
+solar_sensor = SolarRadiationSensorSimulator(topic)
 
 try:
     while True:
-        message = str(random.randint(0, 1280)) + " W/m2"
-        client.publish("solar_sensor", message)
-        print(f"Publicado: {message}")
-        time.sleep(2)
+        solar_sensor.publish_data(client)
+        time.sleep(2)  # Esperar 2 segundos antes da próxima publicação
 except KeyboardInterrupt:
     print("Publicação encerrada")
-
-client.disconnect()
+    client.disconnect()
